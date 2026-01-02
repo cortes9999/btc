@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
     inputs:
       run_mode:
-        description: "btc | portfolio | all"
+        description: "btc | portafolio | all"
         required: true
         default: "all"
 
@@ -57,14 +57,14 @@ jobs:
       # =========================
       # PORTAFOLIO – MENSUAL O MANUAL
       # =========================
-      - name: Portfolio monthly
+      - name: portafolio monthly
         if: |
           (github.event_name == 'workflow_dispatch' &&
-           (inputs.run_mode == 'portfolio' || inputs.run_mode == 'all'))
+           (inputs.run_mode == 'portafolio' || inputs.run_mode == 'all'))
           ||
           (github.event_name == 'schedule' &&
            github.event.schedule == '0 14 1 * *')
-        run: python runners/run_portfolio_monthly.py
+        run: python runners/run_portafolio_monthly.py
         env:
           PYTHONPATH: ${{ github.workspace }}
           EMAIL_USER: ${{ secrets.EMAIL_USER }}

@@ -1,7 +1,7 @@
 import pandas as pd
 from pathlib import Path
 
-LEDGER_PATH = Path("portfolio/ledger.csv")
+LEDGER_PATH = Path("portafolio/ledger.csv")
 
 COLUMNS = ["date", "ticker", "action", "amount_mxn", "price", "units"]
 
