@@ -1,18 +1,18 @@
 import pandas as pd
 from pathlib import Path
 
-# Definir ruta absoluta desde el root del repo
-ROOT_DIR = Path(__file__).resolve().parent.parent  # portfolio/ → repo root
-LEDGER_PATH = ROOT_DIR / "portfolio" / "ledger.csv"
+# ROOT_DIR → root del repo
+ROOT_DIR = Path(__file__).resolve().parent.parent
+
+# Usar tu carpeta correcta
+LEDGER_PATH = ROOT_DIR / "portafolio" / "ledger.csv"
 
 COLUMNS = ["date", "ticker", "action", "amount_mxn", "price", "units"]
 
 def load_ledger():
     """
-    Carga el ledger desde CSV.
-    Si no existe, lo crea vacío y devuelve el DataFrame.
+    Carga o crea el ledger en la carpeta portafolio.
     """
-    # Crear carpeta si no existe
     LEDGER_PATH.parent.mkdir(parents=True, exist_ok=True)
 
     if not LEDGER_PATH.exists():
@@ -26,9 +26,6 @@ def load_ledger():
     return df
 
 def save_ledger(df):
-    """
-    Guarda el DataFrame de ledger en CSV.
-    """
     LEDGER_PATH.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(LEDGER_PATH, index=False)
     print(f"[INFO] Ledger guardado en: {LEDGER_PATH.resolve()}")
