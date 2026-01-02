@@ -1,0 +1,64 @@
+name: Investment Automation
+
+on:
+  schedule:
+    # BTC semanal – lunes
+    - cron: "0 14 * * 1"
+
+    # Portafolio mensual – día 1 de cada mes
+    - cron: "0 14 1 * *"
+
+  workflow_dispatch:
+    inputs:
+      run_mode:
+        description: "btc | portfolio | all"
+        required: true
+        default: "all"
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # =========================
+      # BTC – EJECUCIÓN SEMANAL O MANUAL
+      # =========================
+      - name: BTC weekly
+        if: |
+          (github.event_name == 'workflow_dispatch' &&
+           (inputs.run_mode == 'btc' || inputs.run_mode == 'all'))
+          ||
+          (github.event_name == 'schedule' &&
+           github.event.schedule == '0 14 * * 1')
+        run: python runners/run_btc_weekly.py
+        env:
+          EMAIL_USER: ${{ secrets.EMAIL_USER }}
+          EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
+          EMAIL_TO:   ${{ secrets.EMAIL_TO }}
+
+      # =========================
+      # PORTAFOLIO – EJECUCIÓN MENSUAL O MANUAL
+      # =========================
+      - name: Portfolio monthly
+        if: |
+          (github.event_name == 'workflow_dispatch' &&
+           (inputs.run_mode == 'portfolio' || inputs.run_mode == 'all'))
+          ||
+          (github.event_name == 'schedule' &&
+           github.event.schedule == '0 14 1 * *')
+        run: python runners/run_portfolio_monthly.py
+        env:
+          EMAIL_USER: ${{ secrets.EMAIL_USER }}
+          EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
+          EMAIL_TO:   ${{ secrets.EMAIL_TO }}
