@@ -64,7 +64,7 @@ jobs:
           ||
           (github.event_name == 'schedule' &&
            github.event.schedule == '0 14 1 * *')
-        run: python runners/run_portafolio_monthly.py
+        run: python runners/run_portfolio_monthly.py
         env:
           PYTHONPATH: ${{ github.workspace }}
           EMAIL_USER: ${{ secrets.EMAIL_USER }}
