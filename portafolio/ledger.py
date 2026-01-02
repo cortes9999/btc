@@ -1,19 +1,16 @@
 import pandas as pd
 from pathlib import Path
+import os
 
-# Carpeta opcional para organizar, se crea si no existe
-LEDGER_DIR = Path("portafolio")
-LEDGER_DIR.mkdir(parents=True, exist_ok=True)
-
-# Archivo ledger dentro de esa carpeta
-LEDGER_PATH = LEDGER_DIR / "ledger.csv"
+# CSV directamente en el directorio de ejecución
+LEDGER_PATH = Path("ledger.csv")
 
 COLUMNS = ["date", "ticker", "action", "amount_mxn", "price", "units"]
 
 def load_ledger():
     """
     Carga el ledger desde CSV.
-    Si no existe, lo crea vacío en la carpeta actual o portafolio/
+    Si no existe, lo crea vacío en el mismo directorio de ejecución.
     """
     if not LEDGER_PATH.exists():
         df = pd.DataFrame(columns=COLUMNS)
