@@ -1,11 +1,11 @@
 import yfinance as yf
 
-TICKERS = ["MSFT", "NVDA", "XOM", "BIP", "MELI", "V"]
+TICKERS = ["MSFT", "NVDA", "XOM", "BIP", "MELI"]
+CURRENCY = "MXN"
 
 def get_prices():
-    data = yf.download(TICKERS, period="1d", group_by="ticker")
-    return {t: float(data[t]["Close"].iloc[-1]) for t in TICKERS}
-
-def get_positions(prices):
-    # Placeholder: 10 acciones de cada una
-    return {t: prices[t] * 10 for t in prices}
+    data = yf.download(TICKERS, period="1d", group_by="ticker", auto_adjust=True)
+    prices = {}
+    for t in TICKERS:
+        prices[t] = float(data[t]["Close"].iloc[-1])
+    return prices

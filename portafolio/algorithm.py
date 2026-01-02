@@ -1,27 +1,29 @@
-TARGET = 1 / 6
-BUY_LIMIT = 0.18
 MONTHLY_BUDGET = 6000
 
-def monthly_allocation(values):
-    total = sum(values.values())
-    weights = {k: v / total for k, v in values.items()}
+TARGET_WEIGHTS = {
+    "MSFT": 0.20,
+    "NVDA": 0.20,
+    "XOM": 0.20,
+    "BIP": 0.20,
+    "MELI": 0.20
+}
 
-    gaps = {k: TARGET - w for k, w in weights.items() if w < BUY_LIMIT}
+MIN_GAP = 0.02  # no comprar si está casi en target
+
+def monthly_allocation(weights):
+    gaps = {
+        t: TARGET_WEIGHTS[t] - weights.get(t, 0)
+        for t in TARGET_WEIGHTS
+        if TARGET_WEIGHTS[t] - weights.get(t, 0) > MIN_GAP
+    }
 
     if not gaps:
-        return {}, weights
+        return {}
 
-    ordered = sorted(gaps.items(), key=lambda x: x[1], reverse=True)
+    total_gap = sum(gaps.values())
+    allocations = {
+        t: MONTHLY_BUDGET * (gap / total_gap)
+        for t, gap in gaps.items()
+    }
 
-    alloc = {}
-    if len(ordered) == 1:
-        alloc[ordered[0][0]] = MONTHLY_BUDGET
-    elif len(ordered) == 2:
-        alloc[ordered[0][0]] = MONTHLY_BUDGET * 0.6
-        alloc[ordered[1][0]] = MONTHLY_BUDGET * 0.4
-    else:
-        total_gap = sum(g for _, g in ordered)
-        for t, g in ordered:
-            alloc[t] = MONTHLY_BUDGET * g / total_gap
-
-    return alloc, weights
+    return allocations
