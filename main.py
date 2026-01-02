@@ -1,7 +1,7 @@
 import requests
 import pandas as pd
 import numpy as np
-from datetime import datetime
+from datetime import datetime, UTC
 import smtplib
 from email.mime.text import MIMEText
 import os
@@ -54,29 +54,29 @@ def indicators(price):
 # =============================
 def market_score(row, vol_thr):
     score = 0
-    if row["price"] > row["ma180"]: score += 1
-    if row["ret_8w"] > 0: score += 1
-    if row["vol_6w"] < vol_thr: score += 1
-    if row["dd"] > -0.30: score += 1
+    if row["price"] > row["ma180"]:
+        score += 1
+    if row["ret_8w"] > 0:
+        score += 1
+    if row["vol_6w"] < vol_thr:
+        score += 1
+    if row["dd"] > -0.30:
+        score += 1
     return score
 
 def base_multiplier(score):
-    return {0:0, 1:0, 2:0.5, 3:1.0, 4:1.5}[score]
+    return {0: 0.0, 1: 0.0, 2: 0.5, 3: 1.0, 4: 1.5}[score]
 
 # =============================
 # STATISTICAL FILTERS
 # =============================
 def statistical_adjustment(row):
-    """
-    Returns adjustment factor and explanation
-    """
     factor = 1.0
     notes = []
 
     if abs(row["z_price"]) > 2:
         factor = 0.0
         notes.append("Z-score extremo (>2): compra bloqueada")
-
     elif row["autocorr"] < 0:
         factor = 0.5
         notes.append("Autocorrelación negativa: compra reducida 50%")
@@ -87,14 +87,14 @@ def statistical_adjustment(row):
     return factor, "; ".join(notes)
 
 # =============================
-# EMAIL
+# EMAIL (HTML)
 # =============================
-def send_email(body):
-    if not all(key in os.environ for key in ["EMAIL_USER", "EMAIL_TO", "EMAIL_PASS"]):
-        print("Environment variables EMAIL_USER, EMAIL_TO, EMAIL_PASS not set. Skipping email.")
-        return
+def send_email(body_html):
+    required = ["EMAIL_USER", "EMAIL_TO", "EMAIL_PASS"]
+    if not all(k in os.environ for k in required):
+        raise RuntimeError("Faltan variables de entorno EMAIL_USER / EMAIL_TO / EMAIL_PASS")
 
-    msg = MIMEText(body)
+    msg = MIMEText(body_html, "html")
     msg["Subject"] = "BTC – Señal Sistemática Semanal (Base vs Robusta)"
     msg["From"] = os.environ["EMAIL_USER"]
     msg["To"] = os.environ["EMAIL_TO"]
@@ -117,40 +117,57 @@ def main():
 
     # ----- Recomendación BASE -----
     base_usd = WEEKLY_BUDGET * base_multiplier(score)
-    base_btc = base_usd / last["price"] if base_usd > 0 else 0
+    base_btc = base_usd / last["price"] if base_usd > 0 else 0.0
 
     # ----- Recomendación ROBUSTA -----
     stat_factor, stat_notes = statistical_adjustment(last)
     robust_usd = base_usd * stat_factor
-    robust_btc = robust_usd / last["price"] if robust_usd > 0 else 0
+    robust_btc = robust_usd / last["price"] if robust_usd > 0 else 0.0
 
-    body = f"""
-BTC – Señal Sistemática Semanal
-Fecha: {datetime.now(datetime.UTC).date()}
-Precio BTC (USD): {last['price']:.2f}
+    body_html = f"""
+    <html>
+      <body style="font-family: Arial, sans-serif; line-height: 1.5;">
+        <h2>BTC – Señal Sistemática Semanal</h2>
 
-================================
-1) RECOMENDACIÓN BASE
-================================
-Market Score: {score} / 4
-Monto a comprar (USD): {base_usd:.2f}
-BTC a comprar: {base_btc:.6f}
+        <p>
+          <strong>Fecha:</strong> {datetime.now(UTC).date()}<br>
+          <strong>Precio BTC (USD):</strong> {last['price']:.2f}
+        </p>
 
-================================
-2) RECOMENDACIÓN ROBUSTA
-(Core + Filtros Estadísticos)
-================================
-Ajuste estadístico: {stat_notes}
+        <hr>
 
-Monto a comprar (USD): {robust_usd:.2f}
-BTC a comprar: {robust_btc:.6f}
+        <h3>1) Recomendación BASE</h3>
+        <ul>
+          <li><strong>Market Score:</strong> {score} / 4</li>
+          <li><strong>Monto a comprar (USD):</strong> {base_usd:.2f}</li>
+          <li><strong>BTC a comprar:</strong> {base_btc:.6f}</li>
+        </ul>
 
-Interpretación:
-- La sección 1 sigue reglas puramente de régimen
-- La sección 2 confirma o bloquea compras en extremos estadísticos
-"""
+        <hr>
 
-    send_email(body)
+        <h3>2) Recomendación ROBUSTA<br>
+          <small>(Core + Filtros Estadísticos)</small>
+        </h3>
+
+        <p><strong>Ajuste estadístico:</strong> {stat_notes}</p>
+
+        <ul>
+          <li><strong>Monto a comprar (USD):</strong> {robust_usd:.2f}</li>
+          <li><strong>BTC a comprar:</strong> {robust_btc:.6f}</li>
+        </ul>
+
+        <hr>
+
+        <p style="font-size: 0.9em; color: #555;">
+          <strong>Interpretación:</strong><br>
+          • La recomendación BASE sigue reglas de régimen de mercado.<br>
+          • La recomendación ROBUSTA confirma o bloquea compras en extremos estadísticos.
+        </p>
+      </body>
+    </html>
+    """
+
+    send_email(body_html)
 
 if __name__ == "__main__":
     main()
