@@ -18,7 +18,7 @@ def main():
 
     if allocations:
         ledger = record_purchases(ledger, allocations, prices)
-        save_ledger(ledger)
+    save_ledger(ledger)
 
     body = build_report(values, weights, allocations)
     send_email("Portafolio – Ejecución Mensual", body)
