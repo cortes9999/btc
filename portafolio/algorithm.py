@@ -1,4 +1,4 @@
-from portfolio.config import MONTHLY_BUDGET, TARGET_WEIGHTS, MIN_GAP
+from portafolio.config import MONTHLY_BUDGET, TARGET_WEIGHTS, MIN_GAP
 
 def monthly_allocation(current_weights):
     """
