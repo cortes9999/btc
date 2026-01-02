@@ -1,7 +1,7 @@
-from portfolio.data import get_prices, get_positions
-from portfolio.algorithm import monthly_allocation
-from portfolio.report import build_report
-from portfolio.mail import send_email
+from portafolio.data import get_prices, get_positions
+from portafolio.algorithm import monthly_allocation
+from portafolio.report import build_report
+from portafolio.mail import send_email
 
 def main():
     prices = get_prices()
