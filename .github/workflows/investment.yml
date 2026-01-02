@@ -20,9 +20,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # =========================
+      # CHECKOUT
+      # =========================
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      # =========================
+      # PYTHON
+      # =========================
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
@@ -32,7 +38,7 @@ jobs:
         run: pip install -r requirements.txt
 
       # =========================
-      # BTC – EJECUCIÓN SEMANAL O MANUAL
+      # BTC – SEMANAL O MANUAL
       # =========================
       - name: BTC weekly
         if: |
@@ -43,12 +49,13 @@ jobs:
            github.event.schedule == '0 14 * * 1')
         run: python runners/run_btc_weekly.py
         env:
+          PYTHONPATH: ${{ github.workspace }}
           EMAIL_USER: ${{ secrets.EMAIL_USER }}
           EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
           EMAIL_TO:   ${{ secrets.EMAIL_TO }}
 
       # =========================
-      # PORTAFOLIO – EJECUCIÓN MENSUAL O MANUAL
+      # PORTAFOLIO – MENSUAL O MANUAL
       # =========================
       - name: Portfolio monthly
         if: |
@@ -59,6 +66,7 @@ jobs:
            github.event.schedule == '0 14 1 * *')
         run: python runners/run_portfolio_monthly.py
         env:
+          PYTHONPATH: ${{ github.workspace }}
           EMAIL_USER: ${{ secrets.EMAIL_USER }}
           EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
           EMAIL_TO:   ${{ secrets.EMAIL_TO }}
