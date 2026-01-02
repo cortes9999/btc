@@ -1,7 +1,10 @@
 import yfinance as yf
 
-TICKERS = ["MSFT", "NVDA", "XOM", "BIP", "MELI"]
-CURRENCY = "MXN"
+TICKERS = [
+    "IVV", "VEA", "VWO",
+    "MSFT", "NVDA", "GOOGL", "AMZN", "MELI",
+    "XOM", "CVX", "UNH", "JNJ", "BIP"
+]
 
 def get_prices():
     data = yf.download(TICKERS, period="1d", group_by="ticker", auto_adjust=True)

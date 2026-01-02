@@ -12,7 +12,6 @@ def main():
 
     ledger = load_ledger()
     units = compute_positions(ledger)
-
     values, weights = compute_values(units, prices)
 
     allocations = monthly_allocation(weights)
